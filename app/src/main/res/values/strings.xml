@@ -1,3 +1,8 @@
 <resources>
     <string name="app_name">PebbleFy</string>
+    <string name="next">Next</string>
+    <string name="play">Play</string>
+    <string name="prev">Prev</string>
+    <string name="repeat">Repeat</string>
+    <string name="shuffle">Shuffle</string>
 </resources>

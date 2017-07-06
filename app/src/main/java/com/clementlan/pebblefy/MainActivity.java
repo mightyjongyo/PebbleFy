@@ -5,7 +5,10 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
-import android.widget.TextView;
+import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
+import android.widget.LinearLayout;
 
 import com.spotify.sdk.android.authentication.AuthenticationClient;
 import com.spotify.sdk.android.authentication.AuthenticationRequest;
@@ -78,6 +81,31 @@ public class MainActivity extends Activity implements
 
         this.mApi = new SpotifyApi();
 
+        // Hook up the checkbox listener
+        CheckBox shufflebox = (CheckBox) findViewById(R.id.shuffle_checkbox);
+        shufflebox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                mPlayer.setShuffle(null, b);
+            }
+        });
+
+        // Hook up next/prev buttons
+        Button prev = (Button) findViewById(R.id.prevButton);
+        prev.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                mPlayer.skipToPrevious((Player.OperationCallback) MainActivity.this);
+            }
+        });
+        Button next = (Button) findViewById(R.id.nextButton);
+        next.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                mPlayer.skipToNext((Player.OperationCallback) MainActivity.this);
+            }
+        });
+
         AuthenticationRequest.Builder builder = new AuthenticationRequest.Builder(CLIENT_ID,
                 AuthenticationResponse.Type.TOKEN,
                 REDIRECT_URI);
@@ -104,6 +132,8 @@ public class MainActivity extends Activity implements
                         mPlayer = spotifyPlayer;
                         mPlayer.addConnectionStateCallback(MainActivity.this);
                         mPlayer.addNotificationCallback(MainActivity.this);
+                        // default to shuffle state
+                        mPlayer.setShuffle(null, true);
                     }
 
                     @Override
@@ -149,15 +179,22 @@ public class MainActivity extends Activity implements
             @Override
             public void success(Pager<PlaylistSimple> playlists, Response response) {
                 Log.d("*** Found playlists:", String.valueOf(playlists.total));
-                TextView tv0 = (TextView)findViewById(R.id.textView2);
-                tv0.setText("\n" + String.valueOf(playlists.total));
-                String pl_text = "";
-                TextView tv1 = (TextView)findViewById(R.id.textView3);
+
+                LinearLayout layout = (LinearLayout) findViewById(R.id.mlayout);
                 for (PlaylistSimple plist : playlists.items) {
                     Log.d("*** playlist found: ", plist.name);
-                    pl_text += plist.name + "\n";
+                    PlaylistTextView p_tv = new PlaylistTextView(getApplicationContext());
+                    p_tv.setPlaylist(plist);
+                    p_tv.setClickable(true);
+                    p_tv.setText(plist.name);
+                    p_tv.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            mPlayer.playUri(null, ((PlaylistTextView) (v)).getPlaylistURI(), 0, 0);
+                        }
+                    });
+                    layout.addView(p_tv);
                 }
-                tv1.setText(pl_text);
             }
 
             @Override
@@ -165,7 +202,6 @@ public class MainActivity extends Activity implements
                 Log.d("getMyPlaylists failed: ", error.toString());
             }
         });
-        //mPlayer.playUri(null, "spotify:user:mightyjongyo:playlist:44ZJYKiUdSyCcT98OXPw2h", 0, 0);
     }
 
     @Override
