@@ -27,6 +27,7 @@ dependencies {
     })
     compile 'com.spotify.android:auth:1.0.0-alpha'
     compile 'com.github.kaaes:spotify-web-api-android:0.4.1'
+    compile 'com.getpebble:pebblekit:4.0.1'
     compile 'com.android.support:appcompat-v7:25.3.1'
     compile 'com.android.support.constraint:constraint-layout:1.0.2'
     testCompile 'junit:junit:4.12'
